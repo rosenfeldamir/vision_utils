@@ -1,2 +1,6 @@
 # vision_utils
-lightweight utilities for computer-vision projects
+Lightweight utilities for computer-vision projects
+
+* bounding box operations, such as intersection over union
+* various image cropping method.
+

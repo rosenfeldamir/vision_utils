@@ -1,29 +1,24 @@
 import numpy as np
-import glob
 import time
 import cv2
+from matplotlib import pyplot as plt
 squashImage = True
-
 
 def cropImage(img, rect):
     return img[rect[1]:rect[3], rect[0]:rect[2], :]
 
-
 def chunks(l, n):
     n = max(1, n)
     return [l[i:i + n] for i in range(0, len(l), n)]
-
 
 def boxCenters(boxes):
     x = (boxes[:, 0:1]+boxes[:, 2:3])/2
     y = (boxes[:, 1:2]+boxes[:, 3:4])/2
     return np.concatenate((x, y), 1)
 
-
 def plotRectangle_img(img, t, color=(1, 0, 0), thickness=3):
     t = np.asarray(t).astype(int)
     cv2.rectangle(img, tuple(t[0:2]), tuple(t[2:4]), color, thickness)
-
 
 def sampleTiledRects(img_size, boxSizeRatio=[5], boxOverlap=.5):
     if not isinstance(boxSizeRatio, list):
@@ -39,7 +34,6 @@ def sampleTiledRects(img_size, boxSizeRatio=[5], boxOverlap=.5):
         ys = np.floor(np.asarray(ys))
         all_h.append(np.vstack([xs, ys, xs+boxSize[1], ys+boxSize[0]]).T)
     return np.vstack(all_h)
-
 
 def sampleRandomRects(img_size, boxSizeRatio=5, nBoxes=50):
     '''
@@ -68,14 +62,12 @@ def boxIntersection(b1, b2):
                       min(xmax1, xmax2), min(ymax1, ymax2)])
     return res
 
-
 def boxArea(b):
     if b[2] < b[0]:
         return 0
     if b[3] < b[1]:
         return 0
     return (b[2]-b[0])*(b[3]-b[1])
-
 
 def boxesOverlap(boxes1, boxes2):
     boxes1 = np.reshape(np.asarray(boxes1), (-1, 4))
@@ -89,6 +81,7 @@ def boxesOverlap(boxes1, boxes2):
     for i1, b1 in enumerate(boxes1):
         b1Area = boxArea(b1)
         for i2, b2 in enumerate(boxes2):
+            
             curInt = boxIntersection(b1, b2)
             intArea = boxArea(curInt)
             if intArea <= 0:
@@ -172,7 +165,7 @@ def plotRectangle(r, color='r'):
     points = [[r[0], r[1]], [r[2], r[1]], [r[2], r[3]], [r[0], r[3]], ]
    # print points
     line = plt.Polygon(points, closed=True, fill=None, edgecolor=color, lw=2)
-    gca().add_line(line)
+    plt.gca().add_line(line)
     # show()
 
 
@@ -189,13 +182,11 @@ def relBox2Box(box):
     box[3] = box[3]+box[1]
     return box
 
-
 def boxCenter(box):
     w, h = boxDims(box)
     boxCenterX = box[0]+w/2
     boxCenterY = box[1]+h/2
     return boxCenterX, boxCenterY
-
 
 def makeSquare(box):
     w, h = boxDims(box)
@@ -205,14 +196,12 @@ def makeSquare(box):
     newBox = [boxCenterX-m, boxCenterY-m, boxCenterX+m, boxCenterY+m]
     return newBox
 
-
 def clipBox(targetBox, box):
     targetBox = list(targetBox)
     if len(targetBox) == 2:
         targetBox = [0, 0]+targetBox[::-1]
     newBox = boxIntersection(targetBox, box)
     return newBox
-
 
 def remove_box_overlaps(h, thresh=.5):
     '''
@@ -231,3 +220,33 @@ def remove_box_overlaps(h, thresh=.5):
         for j in other_boxes:
             keep_boxes[j] = False
     return keep_boxes
+
+def ptsToBox(xs,ys):
+  xmin = min(xs)
+  ymin = min(ys)
+  xmax = max(xs)
+  ymax = max(ys)
+  return xmin,ymin,xmax,ymax
+
+def split_boxes(boxes):
+    '''
+    split np array to column representation
+    '''
+    a = boxes[:,0]
+    b = boxes[:,1]
+    c = boxes[:,2]
+    d = boxes[:,3]
+    return a,b,c,d
+
+def to_boxes(a,b,c,d):
+    '''
+    concat column representation to np array. 
+    '''
+    return np.hstack([a,b,c,d])
+
+def to_CWH(boxes):
+    xmin,ymin,xmax,ymax = split_boxes(boxes)
+    cx, cy = (xmin + xmax) / 2, (ymax + ymin) / 2
+    w = xmax - xmin
+    h = ymax - ymin
+    return to_boxes(cx,cy,w,h)

@@ -108,10 +108,14 @@ def boxAspectRatio(b):
     return res
 
 
-def inflateBox(b, f):
+def inflateBox(b, f,is_abs=False):
     width, height = boxDims(b)
-    width = (width*f)/2
-    height = (height*f)/2
+    if is_abs:
+        width+=f/2
+        height+=f/2
+    else:
+        width = (width*f)/2
+        height = (height*f)/2
     center_x = (b[0]+b[2])/2
     center_y = (b[1]+b[3])/2
     # print center_x,center_y
@@ -157,17 +161,16 @@ def chopAll(box, p, mode=0):
     return box
 
 
-def plotRectangle(r, color='r'):
+def plotRectangle(r, color='r', **kwargs):
     if isinstance(r, np.ndarray):
        # print 'd'
         r = r.tolist()
    # print r
     points = [[r[0], r[1]], [r[2], r[1]], [r[2], r[3]], [r[0], r[3]], ]
    # print points
-    line = plt.Polygon(points, closed=True, fill=None, edgecolor=color, lw=2)
+    line = plt.Polygon(points, closed=True, fill=None, edgecolor=color, lw=2, **kwargs)
     plt.gca().add_line(line)
     # show()
-
 
 def splitBox(box, p, mode):
     return [chopLeft(box.copy(), p, mode),
@@ -232,10 +235,11 @@ def split_boxes(boxes):
     '''
     split np array to column representation
     '''
-    a = boxes[:,0]
-    b = boxes[:,1]
-    c = boxes[:,2]
-    d = boxes[:,3]
+    a = boxes[:,0:1]
+    b = boxes[:,1:2]
+    c = boxes[:,2:3]
+    d = boxes[:,3:4]
+    
     return a,b,c,d
 
 def to_boxes(a,b,c,d):
@@ -244,9 +248,12 @@ def to_boxes(a,b,c,d):
     '''
     return np.hstack([a,b,c,d])
 
-def to_CWH(boxes):
+def to_CWH(boxes,box_fmt='united'):
     xmin,ymin,xmax,ymax = split_boxes(boxes)
     cx, cy = (xmin + xmax) / 2, (ymax + ymin) / 2
     w = xmax - xmin
     h = ymax - ymin
-    return to_boxes(cx,cy,w,h)
+    if box_fmt=='united':        
+        return to_boxes(cx,cy,w,h)
+    else:
+        return cx,cy,w,h

@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 ############################# Printing Utilities ##############################
 
@@ -32,8 +32,6 @@ def to_latex(df,fn):
 		tf.write('\end{document}')
 
 ############################## Misc ##########################################
-
-
 def dict_to_param_str(d):
 	'''
 	Represents a dictionary as a concatenated list of key1_value1_key2_value2_...
@@ -54,3 +52,7 @@ def str2bool(v):  # https://stackoverflow.com/posts/43357954/revisions
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+def find(a):
+	return np.nonzero(a)[0]

@@ -3,6 +3,7 @@ import time
 import cv2
 from matplotlib import pyplot as plt
 squashImage = True
+from numpy import array
 
 def cropImage(img, rect):
     return img[rect[1]:rect[3], rect[0]:rect[2], :]
@@ -15,6 +16,17 @@ def boxCenters(boxes):
     x = (boxes[:, 0:1]+boxes[:, 2:3])/2
     y = (boxes[:, 1:2]+boxes[:, 3:4])/2
     return np.concatenate((x, y), 1)
+
+
+def plotRectangle(r, color='r', **kwargs):
+		if isinstance(r, np.ndarray):
+			 # print 'd'
+				r = r.tolist()
+	 # print r
+		points = [[r[0], r[1]], [r[2], r[1]], [r[2], r[3]], [r[0], r[3]], ]
+	 # print points    
+		line = plt.Polygon(points, closed=True, fill=None, edgecolor=color, **kwargs)
+		plt.gca().add_line(line)
 
 def plotRectangle_img(img, t, color=(1, 0, 0), thickness=3):
     t = np.asarray(t).astype(int)
@@ -257,3 +269,12 @@ def to_CWH(boxes,box_fmt='united'):
         return to_boxes(cx,cy,w,h)
     else:
         return cx,cy,w,h
+
+def bb_int(boxes1,boxes2):
+	res = np.zeros((len(boxes1),len(boxes2)))
+	for i1,b1 in enumerate(boxes1):
+		for i2,b2 in enumerate(boxes2):
+			res[i1,i2] = boxArea(boxIntersection(b1,b2))
+	return res
+def bb_areas(boxes):
+	return array([boxArea(b) for b in boxes])

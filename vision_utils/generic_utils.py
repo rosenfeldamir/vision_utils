@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from tqdm import tqdm, tqdm_notebook
 
 ############################# Printing Utilities ##############################
 
@@ -35,8 +36,18 @@ def to_latex(df, fn):
         tf.write(df.to_latex())
         tf.write('\end{document}')
 
-############################## Misc ##########################################
+############################## Command Line Processing ########################
 
+def str2bool(v):  # https://stackoverflow.com/posts/43357954/revisions
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+############################## Misc ##########################################
 
 def dict_to_param_str(d):
     '''
@@ -47,17 +58,6 @@ def dict_to_param_str(d):
         s.append(k)
         s.append(v)
     return '_'.join(map(str, s))
-
-
-############################## Command Line Processing ########################
-
-def str2bool(v):  # https://stackoverflow.com/posts/43357954/revisions
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 def find(a):
@@ -76,24 +76,24 @@ def is_notebook():
     )
 
 
-from tqdm import tqdm, tqdm_notebook
-
-
 def tqdm_fn(*args, **kwargs):
     if is_notebook():
         return tqdm_notebook(*args, **kwargs)
     return tqdm(*args, **kwargs)
 
 # formatting serial output.
-def fn_format(rootdir,i,prefix='',suffix='',n_pad=5):
-  formatted_i = str(i).zfill(n_pad)
-  return os.path.join(rootdi,'{}{}.{}'.format(prefix,formatted_i,suffix))
+
+def fn_format(rootdir, i, prefix='', suffix='', n_pad=5):
+    formatted_i = str(i).zfill(n_pad)
+    return os.path.join(rootdir, '{}_{}.{}'.format(prefix, formatted_i, suffix))
 
 # useful for caching stuff , then reloading instead of recalculating each time
-def calc_or_load(fn,out_path,*args,**kwargs):
-  if os.path.isfile(out_path):
-    f = pickle.load(open(out_path,'rb'))
-  else:
-    f = fn(*args,**kwargs)
-    pickle.dump(f,open(out_path,'wb'))
-  return f
+
+
+def calc_or_load(fn, out_path, *args, **kwargs):
+    if os.path.isfile(out_path):
+        f = pickle.load(open(out_path, 'rb'))
+    else:
+        f = fn(*args, **kwargs)
+        pickle.dump(f, open(out_path, 'wb'))
+    return f

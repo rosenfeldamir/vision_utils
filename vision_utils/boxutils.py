@@ -82,8 +82,8 @@ def boxArea(b):
     return (b[2]-b[0])*(b[3]-b[1])
 
 def boxesOverlap(boxes1, boxes2):
-    boxes1 = np.reshape(np.asarray(boxes1), (-1, 4))
-    boxes2 = np.reshape(boxes2, (-1, 4))
+    boxes1 = np.reshape(np.asarray(boxes1), (-1, 4)).astype(np.float32)
+    boxes2 = np.reshape(boxes2, (-1, 4)).astype(np.float32)
     n1 = boxes1.shape[0]
     n2 = boxes2.shape[0]
     # print n1

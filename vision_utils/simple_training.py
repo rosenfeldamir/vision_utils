@@ -230,8 +230,8 @@ def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslato
         all_accuracies.append(cur_acc)
         all_train_accuracies.append(100 * train_acc)
         corrects.append(cur_acc)
-        print()
 
+        
         if needToSave and (epoch % model_save_freq == 0 or epoch == epochs - 1):
             print('saving model...',)
             checkPointPath = '{}/{}'.format(modelDir, epoch)
@@ -252,5 +252,17 @@ def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslato
                 'cur_acc': cur_acc,
                 'train_acc': train_acc
             }, is_best, epoch, modelDir)
-
-    return corrects
+    # return the current state. 
+    return {
+                'epoch': epoch + 1,
+                'all_train_losses': all_train_losses,
+                'all_val_losses': all_val_losses,
+                'all_accuracies': all_accuracies,
+                'all_train_accuracies': all_train_accuracies,
+                'last_epoch_losses': losses,
+                'state_dict': model.state_dict(),
+                'best_acc': best_acc,
+                'cur_acc': cur_acc,
+                'train_acc': train_acc
+            }    
+    

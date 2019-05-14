@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
+import os
 from tqdm import tqdm, tqdm_notebook
 
 ############################# Printing Utilities ##############################
-
 
 def map_level_to_str(level):
     S = '\t' * level
@@ -88,7 +88,6 @@ def fn_format(rootdir, i, prefix='', suffix='', n_pad=5):
     return os.path.join(rootdir, '{}_{}.{}'.format(prefix, formatted_i, suffix))
 
 # useful for caching stuff , then reloading instead of recalculating each time
-
 
 def calc_or_load(fn, out_path, *args, **kwargs):
     if os.path.isfile(out_path):

@@ -14,13 +14,15 @@ modelsBaseDir = os.path.expanduser('~/models')
 homeDir = expanduser('~')
 experiment_base_dir = expanduser('~/experiments/')
 
-def make_experiment_dir_name(experiment_params): 
+
+def make_experiment_dir_name(experiment_params):
     s = ''
     for i, (k, v) in enumerate(experiment_params.items()):
         s = s + k + '_' + str(v)
         if i < len(experiment_params):
             s += '_'
     return s
+
 
 def make_experiment(experiment_name, experiment_params):
     exp_dir_name = make_experiment_dir_name(experiment_params)
@@ -38,6 +40,7 @@ def matVar(size=(1, 3, 64, 64), cuda=False):
     if cuda:
         v = v.cuda()
     return v
+
 
 def train(model, epoch, optimizer, maxIters=np.inf, targetTranslator=None, train_loader=None, criterion=None, logger=None,
           device='cuda'):
@@ -83,13 +86,15 @@ def train(model, epoch, optimizer, maxIters=np.inf, targetTranslator=None, train
         if batch_idx % 5 == 0 and time() - T0 > .2:
             T0 = time()
             elapsedTime = time() - startTime
-                      
-        
+
             S = 'Train Epoch: \t{epoch} [{iters}/{total} (\t{t2:.0f}%)]\tAvg Loss: \t{t3:.6f}\t({t5:.2f} imgs/sec)'.format(epoch=epoch, iters=batch_idx * len(data),
-                                                                                                        total=len(train_loader.dataset),
-                                                                                                        t2=100. * batch_idx / len(train_loader),
-                                                                                                        t3 = running_loss / nBatches,
-                                                                                                        t5 =nSamples / elapsedTime)
+                                                                                                                           total=len(
+                                                                                                                               train_loader.dataset),
+                                                                                                                           t2=100. * batch_idx /
+                                                                                                                           len(
+                                                                                                                               train_loader),
+                                                                                                                           t3=running_loss / nBatches,
+                                                                                                                           t5=nSamples / elapsedTime)
 
             if logger is not None:
                 logger.log_value('training loss', loss.item(),
@@ -169,7 +174,7 @@ def save_checkpoint(state, is_best, epoch, modelDir):
 
 def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslator=None, model_save_freq=1,
                  train_loader=None, test_loader=None, stopIfPerfect=True, criterion=nn.CrossEntropyLoss(),
-                  lr_scheduler=None, maxIters=np.inf, base_lr=.1, logger=None, device='cuda'):
+                 lr_scheduler=None, maxIters=np.inf, base_lr=.1, logger=None, device='cuda'):
 
     last_epoch = 0
     corrects = []
@@ -231,7 +236,6 @@ def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslato
         all_train_accuracies.append(100 * train_acc)
         corrects.append(cur_acc)
 
-        
         if needToSave and (epoch % model_save_freq == 0 or epoch == epochs - 1):
             print('saving model...',)
             checkPointPath = '{}/{}'.format(modelDir, epoch)
@@ -252,17 +256,14 @@ def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslato
                 'cur_acc': cur_acc,
                 'train_acc': train_acc
             }, is_best, epoch, modelDir)
-    # return the current state. 
-    return {
-                'epoch': epoch + 1,
-                'all_train_losses': all_train_losses,
-                'all_val_losses': all_val_losses,
-                'all_accuracies': all_accuracies,
-                'all_train_accuracies': all_train_accuracies,
-                'last_epoch_losses': losses,
-                'state_dict': model.state_dict(),
-                'best_acc': best_acc,
-                'cur_acc': cur_acc,
-                'train_acc': train_acc
-            }    
-    
+    # return the current state.
+    return {'all_train_losses': all_train_losses,
+            'all_val_losses': all_val_losses,
+            'all_accuracies': all_accuracies,
+            'all_train_accuracies': all_train_accuracies,
+            'last_epoch_losses': losses,
+            'state_dict': model.state_dict(),
+            'best_acc': best_acc,
+            'cur_acc': cur_acc,
+            'train_acc': train_acc
+            }

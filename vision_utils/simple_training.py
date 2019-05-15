@@ -48,21 +48,19 @@ def accuracy(output, target, topk=(1,)):
     return res
 
 def train(model, epoch, optimizer, maxIters=np.inf, train_loader=None,
-          criterion=None, device='cuda:0'):
+          criterion=None, device='cuda:0'):    
     T0 = time()
     model.train()
     losses = AverageMeter()
     top1 = AverageMeter()
     maxIters = min(maxIters, len(train_loader))
     startTime = time()
-    nSamples = 0
-    for batch_idx, (data, target) in enumerate(train_loader):
-        # target = target.long().squeeze()
+    nSamples = 0    
+    for batch_idx, (data, target) in enumerate(train_loader):        
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = criterion(output, target)  # + criterion(output2,target2)
-        # for testing accuracy on train...
+        loss = criterion(output, target)  
         prec1 = accuracy(output.data, target.data, topk=(1,))[0]
         losses.update(loss.item())
         top1.update(prec1.item())
@@ -82,7 +80,6 @@ def train(model, epoch, optimizer, maxIters=np.inf, train_loader=None,
             print('stopping training early (debug mode')
             break
     return losses.avg, top1.avg
-
 
 def test(model, epoch, test_loader=None,  criterion=None, maxIters=np.inf, device='cuda:0'):
     model.eval()
@@ -119,8 +116,8 @@ def get_num_params(model):
 
 
 def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslator=None, model_save_freq=1,
-                 train_loader=None, test_loader=None, stopIfPerfect=True, criterion=nn.CrossEntropyLoss(),
-                 lr_scheduler=None, maxIters=np.inf, base_lr=.1, logger=None, device='cuda'):
+                 train_loader=None, test_loader=None, criterion=nn.CrossEntropyLoss(),
+                 lr_scheduler=None, maxIters=np.inf, base_lr=.1, logger=None, device='cuda',save_only_last=False):
 
     last_epoch = 0
     corrects = []
@@ -166,8 +163,6 @@ def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslato
     if lr_scheduler is not None:  # bring the lr scheduler up to date.
         lr_scheduler.last_epoch = last_epoch
 
-    best_acc = 0
-
     for epoch in range(last_epoch, epochs):
         if lr_scheduler is not None:
             lr_scheduler.step()
@@ -186,8 +181,12 @@ def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslato
             is_best = True
 
         if needToSave:
-            if is_best or (epoch % model_save_freq) == 0 or (epoch == epochs - 1):
-                print('\n\n******saving model******',)
+            S = False
+
+            if ((is_best or epoch % model_save_freq) and not save_only_last) \
+                or epoch == epochs - 1:
+                print('\n\n******saving model******')
+                t_save = time()
                 save_checkpoint({
                     'epoch': epoch + 1,
                     'all_train_losses': all_train_losses,
@@ -197,6 +196,7 @@ def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslato
                     'state_dict': model.state_dict(),
                     'num_params': get_num_params(model),
                 }, is_best, epoch, modelDir)
+                print('saving model required {:3.3f} seconds'.format(time()-t_save))
     return {
         'epoch': epoch + 1,
         'all_train_losses': all_train_losses,

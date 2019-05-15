@@ -1,7 +1,10 @@
 # Vision Utils:
 Lightweight utilities for computer-vision projects
+#### Training:
+* simple_training : Very simple training / testing / logging loop for image classification. 
+
 #### Bounding Boxes
-* Bounding box operations, such as intersection over union
+* boxutils : Bounding box operations, such as intersection over union
 #### Images 
 * Various image cropping methods.
 #### Common Datasets (under construction, not quite ready yet)

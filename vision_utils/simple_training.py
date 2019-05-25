@@ -47,6 +47,9 @@ def accuracy(output, target, topk=(1,)):
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
 
+
+
+
 def train(model, epoch, optimizer, maxIters=np.inf, train_loader=None,
           criterion=None, device='cuda:0'):    
     T0 = time()
@@ -79,14 +82,17 @@ def train(model, epoch, optimizer, maxIters=np.inf, train_loader=None,
         if batch_idx > maxIters:
             print('stopping training early (debug mode')
             break
+    print()
     return losses.avg, top1.avg
 
-def test(model, epoch, test_loader=None,  criterion=None, maxIters=np.inf, device='cuda:0'):
+
+
+def test(model, epoch, test_loader=None,  criterion=None, maxIters=np.inf, device='cuda:0',print_stuff=True):
     model.eval()
     losses = AverageMeter()
     top1 = AverageMeter()
     maxIters = min(maxIters, len(test_loader))
-    for batch_idx, (data, target) in enumerate(tqdm(test_loader, total=len(test_loader))):
+    for batch_idx, (data, target) in enumerate(test_loader):
         data, target = data.to(device), target.to(device)
         output = model(data)
         prec1 = accuracy(output.data, target.data, topk=(1,))[0]
@@ -96,13 +102,13 @@ def test(model, epoch, test_loader=None,  criterion=None, maxIters=np.inf, devic
         if batch_idx >= maxIters:
             print('stopping validation early (debug mode')
             break
-    P = '({epoch}) :[Test set] Avg. loss: \t{test_loss:.4f}, Acc: \t{cur_acc:.1f}%)'
-    P = P.format(epoch=epoch, test_loss=losses.avg, cur_acc=top1.avg)
-    print('\r{}'.format(P), end="")
-
+    if print_stuff:
+        P = '({epoch}) :[Test set] Avg. loss: \t{test_loss:.4f}, Acc: \t{cur_acc:.1f}%)'
+        P = P.format(epoch=epoch, test_loss=losses.avg, cur_acc=top1.avg)
+        print('\r{}'.format(P), end="")
+        print()
     return losses.avg, top1.avg
-
-
+    
 def save_checkpoint(state, is_best, epoch, modelDir):
     """Saves checkpoint to disk"""
     checkPointPath = '{}/{}'.format(modelDir, 'last.pth')
@@ -179,7 +185,7 @@ def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslato
         if test_acc > best_acc:
             best_acc = test_acc
             is_best = True
-
+        
         if needToSave:
             S = False
 

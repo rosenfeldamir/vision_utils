@@ -3,6 +3,14 @@ import numpy as np
 import os
 from tqdm import tqdm, tqdm_notebook
 
+
+############################# Splitting into batches ##########################
+# source: https://stackoverflow.com/a/312464/4395366
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
 ############################# Printing Utilities ##############################
 
 def map_level_to_str(level):
@@ -25,7 +33,7 @@ def pprint_dict_keys(D, level=0):
 ############################## Latex ##########################################
 
 
-def to_latex(df, fn):
+def df_to_latex(df, fn):
     '''
     write a dataframe as a latex table to a file. 
     '''
@@ -33,7 +41,7 @@ def to_latex(df, fn):
         tf.write('\\documentclass{article}\
 				\\usepackage{booktabs}\
 				\\begin{document}')
-        tf.write(df.to_latex())
+        tf.write(df.to_latex(index=False))
         tf.write('\end{document}')
 
 ############################## Command Line Processing ########################
@@ -96,3 +104,21 @@ def calc_or_load(fn, out_path, *args, **kwargs):
         f = fn(*args, **kwargs)
         pickle.dump(f, open(out_path, 'wb'))
     return f
+
+##################### Quickly draw text on image ################################
+from PIL import ImageDraw, ImageFont
+def render_image_w_text(img,cur_title,font_factor=50,fill=(255,0,0)):
+    was_array=False
+    if type(img) is not PIL.Image.Image: # assume an array
+        was_array = True
+        img = PIL.Image.fromarray(img)
+    img = deepcopy(img)
+    draw = ImageDraw.Draw(img)    
+    y_gap = 15
+    font_size = int(font_factor * img.width/600)
+    font = ImageFont.truetype('/usr/share/fonts/truetype/FreeMonoBold.ttf',font_size)
+    textsize=draw.textsize(cur_title,font=font)
+    xy = (5,5)
+    draw.rectangle([xy,(xy[0]+textsize[0],xy[1]+textsize[1])], fill=(255,0,0))
+    draw.text((5,5), cur_title, fill, font=font)    
+    return img

@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
+import itertools
 import os
-from tqdm import tqdm, tqdm_notebook
 
+from tqdm import tqdm, tqdm_notebook
 
 ############################# Splitting into batches ##########################
 # source: https://stackoverflow.com/a/312464/4395366
@@ -11,13 +12,19 @@ def chunks(l, n):
     for i in range(0, len(l), n):
         yield l[i:i + n]
 
+def get_all_subsets(things):
+    res = []
+    for i in range(1,len(things)+1):
+        res.extend(itertools.combinations(things,i))
+    return res
+
+
 ############################# Printing Utilities ##############################
 
 def map_level_to_str(level):
     S = '\t' * level
     #S = '-'*level+'>'
     return S
-
 
 def pprint_dict_keys(D, level=0):
     '''
@@ -31,7 +38,6 @@ def pprint_dict_keys(D, level=0):
         print(map_level_to_str(level) + '{},{}'.format(type(D), len(D)))
 
 ############################## Latex ##########################################
-
 
 def df_to_latex(df, fn):
     '''

@@ -12,6 +12,7 @@ import shutil
 from os.path import expanduser
 homeDir = expanduser('~')
 
+
 class AverageMeter(object):
     """Computes and stores the average and current value
        Imported from https://github.com/pytorch/examples/blob/master/imagenet/main.py#L247-L262
@@ -32,6 +33,7 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
 
+
 def accuracy(output, target, topk=(1,)):
     """Computes the precision@k for the specified values of k"""
     maxk = max(topk)
@@ -48,22 +50,20 @@ def accuracy(output, target, topk=(1,)):
     return res
 
 
-
-
 def train(model, epoch, optimizer, maxIters=np.inf, train_loader=None,
-          criterion=None, device='cuda:0'):    
+          criterion=None, device='cuda:0'):
     T0 = time()
     model.train()
     losses = AverageMeter()
     top1 = AverageMeter()
     maxIters = min(maxIters, len(train_loader))
     startTime = time()
-    nSamples = 0    
-    for batch_idx, (data, target) in enumerate(train_loader):        
+    nSamples = 0
+    for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
-        loss = criterion(output, target)  
+        loss = criterion(output, target)
         prec1 = accuracy(output.data, target.data, topk=(1,))[0]
         losses.update(loss.item())
         top1.update(prec1.item())
@@ -86,8 +86,7 @@ def train(model, epoch, optimizer, maxIters=np.inf, train_loader=None,
     return losses.avg, top1.avg
 
 
-
-def test(model, epoch, test_loader=None,  criterion=None, maxIters=np.inf, device='cuda:0',print_stuff=True):
+def test(model, epoch, test_loader=None,  criterion=None, maxIters=np.inf, device='cuda:0', print_stuff=True):
     model.eval()
     losses = AverageMeter()
     top1 = AverageMeter()
@@ -108,7 +107,8 @@ def test(model, epoch, test_loader=None,  criterion=None, maxIters=np.inf, devic
         print('\r{}'.format(P), end="")
         print()
     return losses.avg, top1.avg
-    
+
+
 def save_checkpoint(state, is_best, epoch, modelDir):
     """Saves checkpoint to disk"""
     checkPointPath = '{}/{}'.format(modelDir, 'last.pth')
@@ -123,7 +123,7 @@ def get_num_params(model):
 
 def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslator=None, model_save_freq=1,
                  train_loader=None, test_loader=None, criterion=nn.CrossEntropyLoss(),
-                 lr_scheduler=None, maxIters=np.inf, base_lr=.1, logger=None, device='cuda',save_only_last=False):
+                 lr_scheduler=None, maxIters=np.inf, base_lr=.1, logger=None, device='cuda', save_only_last=False):
 
     last_epoch = 0
     corrects = []
@@ -185,12 +185,12 @@ def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslato
         if test_acc > best_acc:
             best_acc = test_acc
             is_best = True
-        
+
         if needToSave:
             S = False
 
             if ((is_best or epoch % model_save_freq) and not save_only_last) \
-                or epoch == epochs - 1:
+                    or epoch == epochs - 1:
                 print('\n\n******saving model******')
                 t_save = time()
                 save_checkpoint({
@@ -202,7 +202,8 @@ def trainAndTest(model, optimizer=None, modelDir=None, epochs=5, targetTranslato
                     'state_dict': model.state_dict(),
                     'num_params': get_num_params(model),
                 }, is_best, epoch, modelDir)
-                print('saving model required {:3.3f} seconds'.format(time()-t_save))
+                print('saving model required {:3.3f} seconds'.format(
+                    time()-t_save))
     return {
         'epoch': epoch + 1,
         'all_train_losses': all_train_losses,
